@@ -1,103 +1,88 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  console.log("render");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [newTodo, setNewTodo] = useState("");
+  const [todos, setTodos] = useState([
+    { id: 1, text: "Learn React", isCompleted: false },
+    { id: 2, text: "Learn Next.js", isCompleted: false },
+    { id: 3, text: "Learn TypeScript", isCompleted: false },
+    { id: 4, text: "Push to Vercel", isCompleted: false },
+  ]);
+
+  /** useMemo = only update this state as an effect of another defined piece of state changing */
+  // const incompleteTodos = todos.filter((todo) => !todo.isCompleted).length; // less efficient
+  const numIncompleteTodos = useMemo(
+    () => todos.filter((todo) => !todo.isCompleted).length,
+    [todos]
+  );
+
+  function addTodo(e: FormEvent) {
+    setTodos([
+      ...todos, // copy existing todos
+      {
+        id: todos.length + 1,
+        text: newTodo,
+        isCompleted: false,
+      },
+    ]);
+    setNewTodo("");
+    e.preventDefault(); // prevent reloading page
+  }
+
+  function toggleTodo(index: number) {
+    const todoCopy = [...todos];
+    todoCopy[index].isCompleted = !todoCopy[index].isCompleted;
+    setTodos(todoCopy);
+  }
+
+  return (
+    <div className="wrapper">
+      <main className="container">
+        <div className="header">
+          <h1 className="title">Todo List</h1>
+
+          <div className="incomplete-tasks">
+            <span className="badge">{numIncompleteTodos}</span> incomplete tasks
+          </div>
         </div>
+
+        <form className="todo-form" onSubmit={addTodo}>
+          <input
+            className="todo-input"
+            placeholder="What do you want to do today?"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+          />
+
+          <button disabled={newTodo === ""} className="todo-button">
+            +
+          </button>
+        </form>
+
+        <ul className="todo-list">
+          {todos.map((todo, index) => (
+            <li key={todo.id} className="todo">
+              <label
+                className={`todo-label ${
+                  todo.isCompleted ? "line-through" : ""
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  className="todo-checkbox"
+                  checked={todo.isCompleted}
+                  onChange={() => toggleTodo(index)}
+                />
+                {todo.text}
+              </label>
+            </li>
+          ))}
+        </ul>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
